@@ -5,7 +5,11 @@
 </style></head><body><main class="shell"><header class="top"><div class="brand"><span class="mark">↻</span><div>Rencontre <div class="eyebrow">Speed Business Meeting</div></div></div><button class="primary no-print" onclick="openModal()">＋ Ajouter un participant</button></header><nav class="nav"><button class="active" data-view="dashboard">Tableau de bord</button><button data-view="participants">Participants <span id="navCount"></span></button><button data-view="schedule">Plans de table</button><button data-view="missing">Rencontres manquantes <span id="missingNav"></span></button></nav>
 <section id="dashboard"><div class="grid stats"><div class="card stat"><small>Participants</small><strong id="statPeople">0</strong><span class="pill">Inscrits</span></div><div class="card stat"><small>Tables / capacité</small><strong id="statTables">0 / 0</strong><small id="capacityText"></small></div><div class="card stat"><small>Rotations</small><strong id="statRounds">0</strong><small id="durationText"></small></div><div class="card stat"><small>Remplissage moyen</small><strong id="statFill">0%</strong><small>par rotation</small></div></div><div class="grid split" style="margin-top:16px"><div class="card"><h2 class="section-title">Configuration de l’événement</h2><p class="helper">Définissez le nombre de tables. Sélectionnez au moins un maître du temps par table. Les maîtres du temps tournent d’une table à l’autre à chaque rotation.</p><div class="settings"><div class="field"><label>Nombre de tables</label><input id="tables" type="number" min="1" value="4"></div><div class="field"><label>Capacité / table</label><input id="capacity" type="number" min="2" value="5"></div><div class="field"><label>Nombre de rotations</label><input id="rounds" type="number" min="1" value="4"></div><div class="field"><label>Temps de présentation / personne (secondes)</label><input id="duration" type="number" min="30" value="90"></div><div class="field"><label>Début de l’événement</label><input id="start" type="time" value="18:00"></div><div class="field"><label>Maîtres du temps</label><div id="masters" class="master-list">Aucun maître du temps sélectionné</div></div></div><div class="actions"><button class="primary" onclick="generate()">Optimiser les plans</button><button class="secondary" onclick="openSchedule()">Voir les rotations →</button></div></div><div class="card"><h2 class="section-title">Qualité de l’optimisation</h2><div class="score" id="score" style="--pct:0%"><b id="scoreNum">—</b><span>score global</span></div><div id="quality" class="helper" style="text-align:center">Calculez le plan pour analyser les contraintes.</div><div id="conflicts"></div></div></div><div class="card" style="margin-top:16px"><h2 class="section-title">Règles de calcul</h2><div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:14px"><p class="helper"><b>1 · Zéro répétition</b><br>Une paire ne partage jamais deux fois la même table.</p><p class="helper"><b>2 · Entreprises séparées</b><br>Les collègues ne sont jamais placés ensemble.</p><p class="helper"><b>3 · Équilibre</b><br>Les tables sont remplies au maximum, puis les nouvelles rencontres sont maximisées.</p><p class="helper"><b>4 · Doublons encadrés</b><br>Une table de 3 ne contient aucun duo déjà rencontré ; chaque personne peut y retrouver au maximum 2 personnes déjà rencontrées.</p></div></div></section>
 <section id="participants" class="hidden"><div class="card"><div class="toolbar"><div><h2 class="section-title">Participants</h2><p class="helper">Importez votre fichier Excel ou ajoutez/modifiez les fiches individuellement. <span class="person-icon keeper" title="Maître du temps">⏱</span> maître du temps · <span class="person-icon shared" title="Enseigne représentée plusieurs fois">◉</span> enseigne représentée plusieurs fois.</p></div><div class="actions no-print" style="margin:0"><input id="xlsx" type="file" accept=".xlsx" class="hidden" onchange="importXLSX(event)"><a class="secondary" href="modele-import-participants.xlsx" download="modele-import-participants.xlsx" style="text-decoration:none;display:inline-block">Télécharger le modèle .xlsx</a><button class="secondary" onclick="document.getElementById('xlsx').click()">Importer .xlsx</button><button class="danger" onclick="clearParticipants()">Effacer tous</button><button class="primary" onclick="openModal()">＋ Ajouter</button></div></div><input class="search no-print" id="search" oninput="renderParticipants()" placeholder="Rechercher un nom ou une entreprise…"><div class="table-wrap"><table><thead><tr><th>Participant</th><th>Entreprise</th><th>E-mail</th><th>Téléphone</th><th>Maître du temps</th><th class="no-print"></th></tr></thead><tbody id="peopleRows"></tbody></table></div></div></section>
-<section id="schedule" class="hidden"><div class="card"><div class="toolbar"><div><h2 class="section-title">Plans de table</h2><p class="helper" id="scheduleHelper">Optimisez les plans pour les afficher.</p></div><div class="actions no-print" style="margin:0"><button class="secondary" onclick="exportXLSX()">Exporter Excel</button><button class="secondary" onclick="window.print()">Exporter PDF</button></div></div><div id="roundTabs" class="round-tabs no-print"></div><div id="scheduleContent"></div></div></section><section id="missing" class="hidden"><div class="card"><div class="toolbar"><div><h2 class="section-title">Rencontres manquantes</h2><p class="helper">Paires de participants d’entreprises différentes qui n’ont pas encore partagé de table dans les rotations générées.</p></div><span id="missingBadge" class="pill warn">—</span></div><div id="missingContent"></div></div></section></main>
+<section id="schedule" class="hidden"><div class="card"><div class="toolbar"><div><h2 class="section-title">Plans de table</h2><p class="helper" id="scheduleHelper">Optimisez les plans pour les afficher.</p></div><div class="actions no-print" style="margin:0">
+
+<button class="secondary" onclick="exportXLSX()">Exporter Excel</button><button class="primary" onclick="sendWhatsAppAll()">📱 WhatsApp à tous</button><button class="secondary" onclick="window.print()">Exporter PDF</button>
+
+</div></div><div id="roundTabs" class="round-tabs no-print"></div><div id="scheduleContent"></div></div></section><section id="missing" class="hidden"><div class="card"><div class="toolbar"><div><h2 class="section-title">Rencontres manquantes</h2><p class="helper">Paires de participants d’entreprises différentes qui n’ont pas encore partagé de table dans les rotations générées.</p></div><span id="missingBadge" class="pill warn">—</span></div><div id="missingContent"></div></div></section></main>
 <div id="modal" class="modal hidden"><div class="modalbox"><div class="toolbar"><div><h2 class="section-title" id="modalTitle">Ajouter un participant</h2><p class="helper">Les champs marqués d’un astérisque sont requis.</p></div><button class="secondary" onclick="closeModal()">Fermer</button></div><form onsubmit="savePerson(event)"><input id="editId" type="hidden"><div class="formgrid"><div class="field"><label>Prénom *</label><input required id="first"></div><div class="field"><label>Initiale du nom *</label><input required maxlength="2" id="initial" placeholder="D."></div><div class="field wide"><label>Adresse e-mail *</label><input required type="email" id="email"></div><div class="field wide"><label>Entreprise (enseigne) *</label><input required id="company"></div><div class="field wide"><label>Téléphone / WhatsApp</label><input id="phone" placeholder="+33…"></div></div><div class="actions"><button class="primary" type="submit">Enregistrer</button><button class="secondary" type="button" onclick="closeModal()">Annuler</button></div></form></div></div>
 <script>
 let people=[['Amélie','R.','amelie@aurora.fr','Aurora Conseil','+33610101010'],['Bastien','L.','bastien@cobalt.fr','Cobalt Studio',''],['Chloé','M.','chloe@atelier.fr','Atelier M','+33612121212'],['David','P.','david@novalys.fr','Novalys',''],['Emma','S.','emma@horizon.fr','Horizon RH',''],['Farid','K.','farid@vertex.fr','Vertex',''],['Gabrielle','T.','gabrielle@lesol.fr','Le Sol',''],['Hugo','B.','hugo@marseilleco.fr','Marseille & Co',''],['Inès','D.','ines@azurcom.fr','Azur Com',''],['Julien','A.','julien@cobalt.fr','Cobalt Studio',''],['Karim','N.','karim@delta.fr','Delta Partners',''],['Léa','F.','lea@maisonf.fr','Maison F',''],['Mathieu','C.','mathieu@octave.fr','Octave',''],['Nora','G.','nora@horizon.fr','Horizon RH',''],['Olivier','V.','olivier@provence.fr','Provence Digital',''],['Pauline','J.','pauline@iris.fr','Iris Event',''],['Quentin','E.','quentin@rivieratech.fr','Riviera Tech',''],['Sarah','H.','sarah@impact.fr','Impact & Vous','']].map((x,i)=>({id:'p'+(i+1),first:x[0],initial:x[1],email:x[2],company:x[3],phone:x[4]}));
@@ -15,7 +19,12 @@ function formatSec(seconds){return Math.floor(seconds/60)+' min '+String(seconds
 function esc(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
 function settings(){return{tables:+$('tables').value,cap:+$('capacity').value,rounds:+$('rounds').value,dur:+$('duration').value,start:$('start').value,masters:people.filter(p=>p.master).map(p=>p.id)}}
 function renderMasters(){let list=people.filter(p=>p.master);$('masters').innerHTML=list.length?list.map(p=>`<span class="master">⏱ ${esc(full(p))}</span>`).join(''):'Aucun maître du temps sélectionné'}
-function renderParticipants(){let q=norm($('search').value),masterIds=settings().masters;let companyCount={};people.forEach(p=>companyCount[norm(p.company)]=(companyCount[norm(p.company)]||0)+1);let list=people.filter(p=>!q||norm(full(p)+' '+p.company+' '+p.email).includes(q));$('peopleRows').innerHTML=list.length?list.map(p=>{let keeper=masterIds.includes(p.id),shared=companyCount[norm(p.company)]>1;return `<tr><td class="name">${esc(full(p))}${keeper?'<span class="person-icon keeper" title="Maître du temps">⏱</span>':''}</td><td class="company">${esc(p.company)}${shared?'<span class="person-icon shared" title="Cette enseigne est représentée par plusieurs participants">◉</span>':''}</td><td>${esc(p.email)}</td><td>${esc(p.phone||'—')}</td><td><input class="master-check" type="checkbox" ${keeper?'checked':''} onchange="toggleMaster('${p.id}',this.checked)" title="Définir comme maître du temps"></td><td class="no-print"><button class="secondary" onclick="openModal('${p.id}')">Modifier</button> <button class="danger" onclick="removePerson('${p.id}')">×</button></td></tr>`}).join(''):`<tr><td colspan="6" class="empty">Aucun participant trouvé.</td></tr>`;$('navCount').textContent='('+people.length+')';renderMasters();updateStats()}
+function renderParticipants(){let q=norm($('search').value),masterIds=settings().masters;let companyCount={};people.forEach(p=>companyCount[norm(p.company)]=(companyCount[norm(p.company)]||0)+1);let list=people.filter(p=>!q||norm(full(p)+' '+p.company+' '+p.email).includes(q));$('peopleRows').innerHTML=list.length?list.map(p=>{let keeper=masterIds.includes(p.id),shared=companyCount[norm(p.company)]>1;return `<tr><td class="name">${esc(full(p))}${keeper?'<span class="person-icon keeper" title="Maître du temps">⏱</span>':''}</td><td class="company">${esc(p.company)}${shared?'<span class="person-icon shared" title="Cette enseigne est représentée par plusieurs participants">◉</span>':''}</td><td>${esc(p.email)}</td><td>${esc(p.phone||'—')}</td><td><input class="master-check" type="checkbox" ${keeper?'checked':''} onchange="toggleMaster('${p.id}',this.checked)" title="Définir comme maître du temps"></td><td class="no-print">
+
+<button class="primary" onclick="sendWhatsApp('${p.id}')">📱 WhatsApp</button> <button class="secondary" onclick="openModal('${p.id}')">Modifier</button> <button class="danger" onclick="removePerson('${p.id}')"> × </button>
+
+
+</td></tr>`}).join(''):`<tr><td colspan="6" class="empty">Aucun participant trouvé.</td></tr>`;$('navCount').textContent='('+people.length+')';renderMasters();updateStats()}
 function toggleMaster(id,checked){let p=people.find(x=>x.id===id);p.master=checked;plan=[];planMeta=[];lastRepeats=0;renderParticipants();showQuality(0,0);renderSchedule()}
 function updateStats(){let s=settings(),slots=s.tables*s.cap;$('statPeople').textContent=people.length;$('statTables').textContent=s.tables+' / '+slots;$('statRounds').textContent=s.rounds;$('capacityText').textContent=Number.isFinite(slots)?(slots>=people.length?`${slots-people.length} places disponibles`:`${people.length-slots} places en trop`):'Sélectionnez les maîtres du temps';$('durationText').textContent=formatSec(s.dur)+' / personne';$('statFill').textContent=slots?Math.round(people.length/slots*100)+'%':'0%'}
 function openModal(id){let p=people.find(x=>x.id===id);$('modalTitle').textContent=p?'Modifier le participant':'Ajouter un participant';$('editId').value=p?.id||'';['first','initial','email','company','phone'].forEach(k=>$(k).value=p?.[k]||'');$('modal').classList.remove('hidden');$('first').focus()}function closeModal(){$('modal').classList.add('hidden')}
@@ -142,5 +151,115 @@ function renderSchedule(){let s=settings();if(!plan.length){$('roundTabs').inner
 function renderMissing(){let coverage=meetingCoverage(),nav=$('missingNav');nav.textContent=coverage.missing?`(${coverage.missing})`:'';$('missingBadge').textContent=coverage.missing?`${coverage.missing} à organiser`:'Objectif atteint';$('missingBadge').className=coverage.missing?'pill warn':'pill';if(!plan.length){$('missingContent').innerHTML='<div class="empty">Calculez les plans de table pour identifier les rencontres manquantes.</div>';return}if(!coverage.missing){$('missingContent').innerHTML='<div class="notice">✓ Toutes les rencontres compatibles ont eu lieu.</div>';return}let pairs=coverage.missingPairs.map(key=>{let [a,b]=key.split('|'),pa=people.find(p=>p.id===a),pb=people.find(p=>p.id===b);return `<tr><td class="name">${esc(full(pa))}</td><td class="company">${esc(pa.company)}</td><td class="name">${esc(full(pb))}</td><td class="company">${esc(pb.company)}</td></tr>`}).join('');$('missingContent').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Participant 1</th><th>Entreprise</th><th>Participant 2</th><th>Entreprise</th></tr></thead><tbody>${pairs}</tbody></table></div>`}
 function showView(v){document.querySelectorAll('main>section').forEach(x=>x.classList.toggle('hidden',x.id!==v));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));if(v==='schedule')renderSchedule();if(v==='missing')renderMissing()}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));['tables','capacity','rounds','duration'].forEach(id=>$(id).oninput=()=>{plan=[];updateStats();showQuality(0,0);renderSchedule()});
+
+function getWhatsappText(personId){
+
+    let person = people.find(p => p.id === personId);
+
+    let lignes = [];
+
+    plan.forEach((round, roundIndex) => {
+
+        let tableIndex =
+            round.findIndex(table => table.includes(personId));
+
+        if(tableIndex >= 0){
+
+            lignes.push(
+                `Rotation ${roundIndex + 1} : Table ${tableIndex + 1}`
+            );
+
+        }
+
+    });
+
+    return `Bonjour ${person.first},
+
+Voici votre plan de table :
+
+${lignes.join('\n')}
+
+Au plaisir de vous accueillir.`;
+}
+
+function sendWhatsApp(id){
+
+    if(!plan.length){
+        alert("Générez d'abord les plans.");
+        return;
+    }
+
+    let person = people.find(p => p.id === id);
+
+    if(!person.phone){
+        alert("Aucun numéro WhatsApp.");
+        return;
+    }
+
+    let phone =
+        person.phone.replace(/\D/g,'');
+
+    if(phone.startsWith('0')){
+        phone = '33' + phone.substring(1);
+    }
+
+    let text = getWhatsappText(id);
+
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(text)}`,
+      '_blank'
+    );
+}
+
+function sendWhatsAppAll(){
+
+    let contacts =
+        people.filter(p => p.phone);
+
+    if(!contacts.length){
+        alert("Aucun numéro renseigné.");
+        return;
+    }
+
+    let liste = contacts.map(person => {
+
+        let phone =
+            person.phone.replace(/\D/g,'');
+
+        if(phone.startsWith('0')){
+            phone = '33' + phone.substring(1);
+        }
+
+        let text =
+            getWhatsappText(person.id);
+
+        let url =
+            `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+
+        return `
+            <p>
+              <b>${person.first} ${person.initial}</b>
+              -
+              ${url}
+                📱 Envoyer WhatsApp
+              </a>
+            </p>
+        `;
+    }).join('');
+
+    let w = window.open('', '_blank');
+
+    w.document.write(`
+      <html>
+      <body style="font-family:Arial;padding:20px">
+        <h2>📱 WhatsApp à tous</h2>
+        ${liste}
+      </body>
+      </html>
+    `);
+}
+
+
+
 renderParticipants();showQuality(0,0);renderSchedule();renderMissing();
 </script></body></html>
