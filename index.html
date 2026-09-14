@@ -187,7 +187,7 @@ function showView(v){document.querySelectorAll('main>section').forEach(x=>x.clas
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.view));['tables','capacity','rounds','duration'].forEach(id=>$(id).oninput=()=>{plan=[];updateStats();showQuality(0,0);renderSchedule()});
 
 function getWhatsappText(personId){
-
+const date = document.getElementById('date').value;
     let person = people.find(p => p.id === personId);
 
     let lignes = [];
